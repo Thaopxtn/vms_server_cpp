@@ -5908,7 +5908,7 @@ function makeSlot(cid, featured = false, isAiSlot = false) {
     ? (testMedia.kind === "video"
         ? `<video class="ai-test-media" src="${testMedia.url}" autoplay muted loop playsinline controls></video>`
         : `<img class="ai-test-media" src="${testMedia.url}" alt="AI test media">`)
-    : `<iframe id="vid-${cid}" src="${streamUrlParam(streamId, isMuted)}" allowfullscreen allow="autoplay" ${isMuted ? 'muted' : ''} loading="lazy" style="pointer-events: none !important;"></iframe>`;
+    : `<video class="webrtc-video" id="vid-${cid}" autoplay playsinline ${isMuted ? 'muted' : ''} style="width: 100%; height: 100%; object-fit: contain; pointer-events: none !important;"></video>`;
   
   const slot = document.createElement("div");
   slot.className = "cam-slot" + (isAiSlot || isAiEnabled ? " ai-locked" : "") + (testMedia ? " ai-test-source" : "") + (online || testMedia ? "" : " offline") + (hasRecentAlert(cid) ? " alerting" : "") + (featured ? " featured" : "");
@@ -6068,8 +6068,14 @@ function disableAiCamera(cid) {
 }
 
 function killSlot(cid, slot) {
-  const iframe = slot && slot.querySelector("video.webrtc-video");
-  if (iframe) iframe.src = "about:blank";
+  const video = slot && slot.querySelector("video.webrtc-video");
+  if (video) {
+    if (video._webrtc) {
+      video._webrtc.destroy();
+      video._webrtc = null;
+    }
+    video.srcObject = null;
+  }
   stopTS(cid);
   if (REC[cid]) {
     try { REC[cid].stop(); } catch (error) {}
@@ -8945,17 +8951,17 @@ function handleStreamVisibility(cid, iframe, isVisible) {
   if (isVisible) {
     if (G_hiddenStreams[cid]) {
       delete G_hiddenStreams[cid];
-      const isMuted = G.camMuted[cid] !== false; // default true
-      const isHD = G.camQuality[cid] === "hd";
-      const streamId = isHD ? cid + "_hd" : cid;
-      const targetSrc = streamUrlParam(streamId, isMuted);
-      if (!iframe._webrtc) {
-        iframe._webrtc = new VMSWebRTCPlayer(iframe, streamId, GO2RTC);
-        iframe._webrtc.setMute(isMuted);
-      } else {
-        if (iframe._webrtc.streamId !== streamId) iframe._webrtc.changeStream(streamId);
-        iframe._webrtc.setMute(isMuted);
-      }
+    }
+    const isMuted = G.camMuted[cid] !== false; // default true
+    const isHD = G.camQuality[cid] === "hd";
+    const streamId = isHD ? cid + "_hd" : cid;
+    const targetSrc = streamUrlParam(streamId, isMuted);
+    if (!iframe._webrtc) {
+      iframe._webrtc = new VMSWebRTCPlayer(iframe, streamId, GO2RTC);
+      iframe._webrtc.setMute(isMuted);
+    } else {
+      if (iframe._webrtc.streamId !== streamId) iframe._webrtc.changeStream(streamId);
+      iframe._webrtc.setMute(isMuted);
     }
   } else {
     if (!G_hiddenStreams[cid]) {
