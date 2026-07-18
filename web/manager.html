@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VMS - Quản lý thiết bị</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #05080d;
+  --panel: rgba(13, 18, 27, 0.92);
+  --line: rgba(140, 175, 210, 0.15);
+  --text: #edf3f9;
+  --text-2: #93a1b3;
+  --accent: #00d1ff;
+  --radius: 11px;
+}
+* { box-sizing: border-box; }
+body { font-family: "Inter", sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.5; }
+.container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.header h1 { margin: 0; font-size: 28px; }
+.back-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--text); padding: 10px 20px; border-radius: 8px; cursor: pointer; text-decoration: none; font-weight: 500; transition: background 0.2s; }
+.back-btn:hover { background: rgba(255,255,255,0.1); }
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.tab { padding: 10px 24px; background: transparent; border: none; color: var(--text-2); border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+.tab:hover { color: var(--text); }
+.tab.active { background: rgba(0, 209, 255, 0.1); color: var(--accent); }
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.card-header h2 { margin: 0; font-size: 20px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--line); }
+th { color: var(--text-2); font-weight: 600; background: rgba(0,0,0,0.2); }
+tr:hover td { background: rgba(255,255,255,0.02); }
+tr:last-child td { border-bottom: none; }
+
+.btn { background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.9; }
+.btn-danger { background: #ff5d5f; color: #fff; }
+.btn-outline { background: transparent; border: 1px solid var(--line); color: var(--text); }
+.actions { display: flex; gap: 8px; }
+.tag { padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 12px; }
+
+/* Modal */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal.open { display: flex; }
+.modal-content { background: var(--panel); border: 1px solid var(--line); padding: 30px; border-radius: var(--radius); width: 450px; max-width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.modal-title { margin-top: 0; margin-bottom: 25px; font-size: 22px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px; }
+.form-group input, .form-group select { width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px; font-family: inherit; font-size: 14px; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; }
+.probe-result { text-align: left; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,0.035); margin-bottom: 12px; font-size: 12px; }
+.probe-result code { color: var(--accent); word-break: break-all; }
+.probe-open { color: #4ade80; }
+.probe-closed { color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Quản lý thiết bị</h1>
+    <a href="/" class="back-btn">← Quay lại VMS</a>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('cameras')">Camera</button>
+    <button class="tab" onclick="switchTab('dvrs')">Đầu ghi (DVR/NVR)</button>
+  </div>
+
+  <!-- CAMERAS -->
+  <div id="view-cameras" class="view active card">
+    <div class="card-header">
+      <h2>Danh sách Camera</h2>
+      <div>
+          <button class="btn btn-outline" style="margin-right:8px;" onclick="openScanModal()">Quét mạng LAN</button>
+          <button class="btn" onclick="openCameraModal()">+ Thêm Camera</button>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Camera ID</th>
+          <th>Tên Camera</th>
+          <th>RTSP URL</th>
+          <th>Đầu ghi (DVR ID)</th>
+          <th width="150">Hành động</th>
+        </tr>
+      </thead>
+      <tbody id="camera-list">
+        <tr><td colspan="5" style="text-align:center;color:var(--text-2);">Đang tải...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DVRS -->
+  <div id="view-dvrs" class="view card">
+    <div class="card-header">
+      <h2>Danh sách Đầu ghi</h2>
+          <button class="btn btn-primary" onclick="openDvrModal()">+ Thêm Đầu ghi</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>DVR ID</th>
+          <th>Tên</th>
+          <th>Host (IP)</th>
+          <th>Cổng HTTP/RTSP</th>
+          <th>Hãng</th>
+          <th width="220">Hành động</th>
+        </tr>
+      </thead>
+      <tbody id="dvr-list">
+        <tr><td colspan="6" style="text-align:center;color:var(--text-2);">Đang tải...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal" id="camera-modal">
+  <div class="modal-content" style="width: 520px;">
+    <h2 class="modal-title" id="camera-modal-title">Thêm Camera</h2>
+    <form id="camera-form" onsubmit="saveCamera(event)">
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <div class="form-group" style="flex:1; margin-bottom:0;">
+          <label>Camera ID (Tự động)</label>
+          <input type="text" id="cam_id" readonly style="background: rgba(255,255,255,0.05); color: var(--text-2); cursor: not-allowed;" />
+        </div>
+        <div class="form-group" style="flex:2; margin-bottom:0;">
+          <label>Tên Camera</label>
+          <input type="text" id="cam_name" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Giao thức kết nối</label>
+        <select id="builder_proto" onchange="onProtocolChange()" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;">
+            <option value="dvrip">Dahua TCP (dvrip) - C&#7893;ng 377xx (37775/37777) [Khuy&#234;n d&#249;ng Dahua/KB/Imou]</option>
+            <option value="dahua_http">📷 Dahua HTTP (MJPEG) — Cổng HTTP (80/8001...)</option>
+            <option value="rtsp_dahua">📡 RTSP Dahua/KBVision — Cổng 554</option>
+            <option value="rtsp_hik">📡 RTSP Hikvision — Cổng 554</option>
+            <option value="isapi">🔌 ISAPI Hikvision — Cổng 80</option>
+            <option value="onvif">🔍 ONVIF (Tự dò) — Cổng 80/8080</option>
+            <option value="custom">⚙️ Tùy chỉnh (Nhập URL thủ công)</option>
+        </select>
+        <div id="proto-hint" style="color: var(--accent); display: block; margin-top: 8px; font-size: 12px; line-height: 1.5; background: rgba(0,209,255,0.06); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(0,209,255,0.15);">
+           💡 <strong>Dahua TCP (dvrip)</strong>: Kết nối qua giao thức TCP riêng của Dahua. Nhanh, ổn định, hỗ trợ H.264/H.265. Cần mở cổng TCP (mặc định 37777) trên router/camera.
+        </div>
+      </div>
+
+      <div id="standard-fields">
+          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+             <div style="flex:2;">
+               <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px;">Địa chỉ IP / DDNS</label>
+               <input type="text" id="builder_ip" placeholder="VD: 192.168.1.100 hoặc abc.smartddns.tv" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;" />
+             </div>
+             <div style="flex:1;">
+               <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px;">Cổng</label>
+               <input type="number" id="builder_port" value="37777" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;" />
+             </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+             <div style="flex:1;">
+               <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px;">Tài khoản</label>
+               <input type="text" id="builder_user" value="admin" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;" />
+             </div>
+             <div style="flex:1;">
+               <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px;">Mật khẩu</label>
+               <input type="password" id="builder_pass" placeholder="Nhập mật khẩu" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;" />
+             </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+             <div style="flex:1;">
+               <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px;">Kênh (Channel)</label>
+               <input type="number" id="builder_channel" value="1" min="1" max="256" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;" />
+             </div>
+             <div style="flex:1;">
+               <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px;">Chất lượng</label>
+               <select id="builder_subtype" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); color: var(--text); border-radius: 6px;">
+                   <option value="0">Luồng chính (HD)</option>
+                   <option value="1" selected>Luồng phụ (SD) — Nhẹ hơn</option>
+               </select>
+             </div>
+          </div>
+          <div id="pass-warn" style="display:none; color: #ffb74d; font-size: 12px; margin: -8px 0 12px 0; padding: 6px 10px; background: rgba(255,183,77,0.08); border-radius: 6px; border: 1px solid rgba(255,183,77,0.2);">
+             ⚠️ Mật khẩu chứa ký tự đặc biệt <strong>@</strong> — Hệ thống sẽ tự động mã hóa URL, bạn không cần lo lắng.
+          </div>
+      </div>
+
+      <div id="custom-field" class="form-group" style="display: none;">
+        <label>Đường dẫn luồng đầy đủ</label>
+        <input type="text" id="cam_rtsp" placeholder="VD: dvrip://admin:pass@ip:37777?channel=1&subtype=0" />
+        <small style="color: var(--text-2); display: block; margin-top: 6px; line-height: 1.5; font-size: 12px;">
+           Nhập URL đầy đủ. Hỗ trợ: <code>rtsp://</code>, <code>dvrip://</code>, <code>http://</code>, <code>isapi://</code>, <code>onvif://</code><br>
+           Ký tự <strong>@</strong> trong mật khẩu phải được viết là <strong>%40</strong>. VD: <code>dvrip://admin:123456a%40@host:37777</code>
+        </small>
+      </div>
+
+      <div id="url-preview" style="margin-bottom: 16px; display: none;">
+        <label style="display: block; margin-bottom: 6px; color: var(--text-2); font-size: 12px;">URL sẽ được tạo:</label>
+        <div id="url-preview-text" style="font-family: monospace; font-size: 11px; color: var(--accent); background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; word-break: break-all; border: 1px solid var(--line);"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Thuộc Đầu ghi (Tùy chọn)</label>
+        <select id="cam_dvr_id">
+          <option value="">-- Không thuộc đầu ghi nào (Camera độc lập) --</option>
+        </select>
+      </div>
+      
+      <div id="test-result" style="margin-bottom: 15px; text-align: center;"></div>
+      
+      <div class="modal-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="btn btn-outline" onclick="testConnection()">🔗 Kiểm tra kết nối</button>
+        <div style="flex: 1;"></div>
+        <button type="button" class="btn btn-outline" onclick="closeModal('camera-modal')">Hủy</button>
+        <button type="submit" class="btn">💾 Lưu lại</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DVR Modal -->
+<div class="modal" id="dvr-modal">
+  <div class="modal-content">
+    <h2 class="modal-title" id="dvr-modal-title">Thêm Đầu ghi</h2>
+    <form id="dvr-form" onsubmit="saveDVR(event)">
+      <div class="form-group">
+        <label>DVR ID (Tự động)</label>
+        <input type="text" id="dvr_id" readonly style="background: rgba(255,255,255,0.05); color: var(--text-2); cursor: not-allowed;" />
+      </div>
+      <div class="form-group">
+        <label>Tên Đầu ghi</label>
+        <input type="text" id="dvr_name" required />
+      </div>
+      <div class="form-group">
+        <label>Host / IP Address</label>
+        <input type="text" id="dvr_host" required />
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+          <label>HTTP Port (Web)</label>
+          <input type="number" id="dvr_http_port" value="80" required />
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Cổng SDK (TCP)</label>
+          <input type="number" id="dvr_tcp_port" value="37777" required />
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Cổng RTSP</label>
+          <input type="number" id="dvr_rtsp_port" value="554" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Tài khoản</label>
+        <input type="text" id="dvr_user" value="admin" />
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="dvr_pass" />
+        <small style="color:var(--text-2);font-size:11px;">(Chỉ nhập khi thêm mới hoặc muốn đổi mật khẩu)</small>
+      </div>
+      <div class="form-group">
+        <label>Hãng (Brand)</label>
+        <select id="dvr_brand">
+          <option value="dahua" selected>Dahua / KBVision / Imou</option>
+          <option value="generic">Hikvision / Khác</option>
+        </select>
+        <small style="color: var(--text-2); display: block; margin-top: 6px; line-height: 1.4;">
+           * Ghi chú: Nếu dùng <strong>Dahua/KBVision</strong>, nên để Cổng Video là <strong>37775/37777</strong> (kết nối TCP). Nếu dùng hãng khác, thường Cổng Video là <strong>554</strong> (RTSP) hoặc <strong>80</strong> (ISAPI).
+        </small>
+      </div>
+      
+      <div id="dvr-test-result" style="margin-bottom: 15px; text-align: center;"></div>
+      
+      <div class="modal-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="btn btn-outline" onclick="autoDetectDVRConnection()">T&#7921; nh&#7853;n di&#7879;n t&#7889;t nh&#7845;t</button>
+        <button type="button" class="btn btn-outline" onclick="testDVRConnection()">Kiểm tra kết nối</button>
+        <div style="flex: 1;"></div>
+        <button type="button" class="btn btn-outline" onclick="closeModal('dvr-modal')">Hủy</button>
+        <button type="submit" class="btn">Lưu lại</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scan LAN Modal -->
+<div class="modal" id="scan-modal">
+  <div class="modal-content">
+    <h2 class="modal-title">Quét thiết bị trong mạng LAN</h2>
+    <div id="scan-status" style="margin-bottom: 20px; color: var(--text-2);">
+       Nhấn "Bắt đầu quét" để dò tìm IP Camera hỗ trợ ONVIF trong mạng.
+    </div>
+    <div id="scan-results" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
+       <!-- Results go here -->
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeModal('scan-modal')">Đóng</button>
+      <button type="button" class="btn" id="btn-start-scan" onclick="startScan()">Bắt đầu quét</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let cameras = [];
+let dvrs = [];
+let editingCamId = null;
+let editingDvrId = null;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(`view-${tab}`).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+async function fetchCameras() {
+  try {
+    const res = await fetch('/api/cameras');
+    cameras = await res.json();
+    renderCameras();
+  } catch(e) { console.error(e); }
+}
+
+async function fetchDVRs() {
+  try {
+    const res = await fetch('/api/dvrs');
+    dvrs = await res.json();
+    renderDVRs();
+    updateDVRSelects();
+  } catch(e) { console.error(e); }
+}
+
+function updateDVRSelects() {
+  const sel = document.getElementById('cam_dvr_id');
+  sel.innerHTML = '<option value="">-- Không thuộc đầu ghi nào --</option>';
+  dvrs.forEach(d => {
+    sel.innerHTML += `<option value="${d.dvr_id}">${d.name} (${d.host})</option>`;
+  });
+}
+
+function renderCameras() {
+  const tbody = document.getElementById('camera-list');
+  tbody.innerHTML = '';
+  if(!cameras.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-2);">Chưa có camera nào</td></tr>';
+    return;
+  }
+  cameras.forEach(c => {
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${c.camera_id}</strong></td>
+        <td>${c.name}</td>
+        <td><div style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.rtsp_url}">${c.rtsp_url}</div></td>
+        <td>${c.dvr_id ? `<span class="tag">${c.dvr_id}</span>` : '-'}</td>
+        <td class="actions">
+          <button class="btn btn-outline" onclick="editCamera('${c.camera_id}')">Sửa</button>
+          <button class="btn btn-danger" onclick="deleteCamera('${c.camera_id}')">Xóa</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function renderDVRs() {
+  const tbody = document.getElementById('dvr-list');
+  tbody.innerHTML = '';
+  if(!dvrs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-2);">Chưa có đầu ghi nào</td></tr>';
+    return;
+  }
+  dvrs.forEach(d => {
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${d.dvr_id}</strong></td>
+        <td>${d.name}</td>
+        <td>${d.host}</td>
+        <td>${d.http_port} / ${d.rtsp_port}</td>
+        <td><span class="tag" style="text-transform:capitalize">${d.brand}</span></td>
+        <td class="actions">
+          <button class="btn btn-outline" onclick="syncDVR('${d.dvr_id}')" title="Đồng bộ danh sách Camera từ DVR">Đồng bộ</button>
+          <button class="btn btn-outline" onclick="editDVR('${d.dvr_id}')">Sửa</button>
+          <button class="btn btn-danger" onclick="deleteDVR('${d.dvr_id}')">Xóa</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// Camera Actions
+function getNextCameraId() {
+    let max = 0;
+    cameras.forEach(c => {
+        const match = c.camera_id.match(/cam_(\d+)/);
+        if (match) {
+            const num = parseInt(match[1]);
+            if (num > max) max = num;
+        }
+    });
+    return `cam_${max + 1}`;
+}
+
+function onProtocolChange() {
+    const proto = document.getElementById('builder_proto').value;
+    const standardFields = document.getElementById('standard-fields');
+    const customField = document.getElementById('custom-field');
+    const portInput = document.getElementById('builder_port');
+    const hintDiv = document.getElementById('proto-hint');
+    const urlPreview = document.getElementById('url-preview');
+    
+    if (proto === 'custom') {
+        standardFields.style.display = 'none';
+        customField.style.display = 'block';
+        urlPreview.style.display = 'none';
+        hintDiv.innerHTML = '💡 <strong>Tùy chỉnh</strong>: Nhập URL kết nối đầy đủ. Ký tự <strong>@</strong> trong mật khẩu phải viết là <strong>%40</strong>.';
+    } else {
+        standardFields.style.display = 'block';
+        customField.style.display = 'none';
+        
+        const portMap = {
+            dvrip: 37777, dahua_http: 80, rtsp_dahua: 554,
+            rtsp_hik: 554, isapi: 80, onvif: 80
+        };
+        portInput.value = portMap[proto] || 554;
+        
+        const hints = {
+            dvrip: '💡 <strong>Dahua TCP (dvrip)</strong>: Kết nối qua giao thức TCP riêng của Dahua. Nhanh, ổn định, hỗ trợ H.264/H.265. Cần mở <strong>cổng TCP</strong> (mặc định 37777) trên router/camera.',
+            dahua_http: '💡 <strong>Dahua HTTP</strong>: Kết nối qua cổng HTTP (web). Chỉ hỗ trợ MJPEG (không H.264). Phù hợp khi chỉ mở cổng HTTP (80/8001...) mà chưa mở RTSP hoặc TCP.',
+            rtsp_dahua: '💡 <strong>RTSP Dahua</strong>: Kết nối chuẩn RTSP cho camera Dahua/KBVision/Imou. Cần mở <strong>cổng RTSP</strong> (mặc định 554) trên camera.',
+            rtsp_hik: '💡 <strong>RTSP Hikvision</strong>: Kết nối chuẩn RTSP cho camera Hikvision/Ezviz. Cần mở <strong>cổng RTSP</strong> (mặc định 554).',
+            isapi: '💡 <strong>ISAPI Hikvision</strong>: Kết nối qua HTTP ISAPI protocol. go2rtc sẽ tự dò tìm luồng video. Cần mở cổng HTTP (80).',
+            onvif: '💡 <strong>ONVIF</strong>: go2rtc sẽ tự dò tìm luồng thông qua chuẩn ONVIF. Hoạt động với hầu hết camera hiện đại. Cần mở cổng HTTP (80/8080).'
+        };
+        hintDiv.innerHTML = hints[proto] || '';
+        updateUrlPreview();
+    }
+}
+
+function updateUrlPreview() {
+    const proto = document.getElementById('builder_proto').value;
+    if (proto === 'custom') return;
+    
+    const urlPreview = document.getElementById('url-preview');
+    const urlText = document.getElementById('url-preview-text');
+    const url = generateFinalUrl();
+    
+    if (url) {
+        // Ẩn mật khẩu trong preview
+        const maskedUrl = url.replace(/(\/\/[^:]+:)([^@]+)(@)/, '$1****$3');
+        urlText.textContent = maskedUrl;
+        urlPreview.style.display = 'block';
+    } else {
+        urlPreview.style.display = 'none';
+    }
+}
+
+function checkPasswordWarning() {
+    const pass = document.getElementById('builder_pass').value;
+    const warn = document.getElementById('pass-warn');
+    warn.style.display = pass.includes('@') ? 'block' : 'none';
+    updateUrlPreview();
+}
+
+// Gắn sự kiện cho input fields để auto-update preview
+document.addEventListener('DOMContentLoaded', () => {
+    ['builder_ip', 'builder_port', 'builder_user', 'builder_channel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateUrlPreview);
+    });
+    const passEl = document.getElementById('builder_pass');
+    if (passEl) passEl.addEventListener('input', checkPasswordWarning);
+    const subtypeEl = document.getElementById('builder_subtype');
+    if (subtypeEl) subtypeEl.addEventListener('change', updateUrlPreview);
+});
+
+function openCameraModal() {
+  editingCamId = null;
+  const nextId = getNextCameraId();
+  document.getElementById('camera-modal-title').innerText = "Thêm Camera";
+  document.getElementById('cam_id').value = nextId;
+  document.getElementById('cam_name').value = "Camera " + nextId.split('_')[1];
+  
+  document.getElementById('builder_proto').value = 'dvrip';
+  document.getElementById('builder_ip').value = "";
+  document.getElementById('builder_pass').value = "";
+  document.getElementById('builder_user').value = "admin";
+  document.getElementById('builder_channel').value = "1";
+  document.getElementById('builder_subtype').value = "1";
+  document.getElementById('cam_rtsp').value = "";
+  document.getElementById('cam_dvr_id').value = "";
+  document.getElementById('test-result').innerHTML = "";
+  document.getElementById('url-preview').style.display = 'none';
+  document.getElementById('pass-warn').style.display = 'none';
+  
+  onProtocolChange();
+  document.getElementById('camera-modal').classList.add('open');
+}
+
+function editCamera(id) {
+  const c = cameras.find(x => x.camera_id === id);
+  if(!c) return;
+  editingCamId = id;
+  document.getElementById('camera-modal-title').innerText = "Sửa Camera";
+  document.getElementById('cam_id').value = c.camera_id;
+  document.getElementById('cam_name').value = c.name;
+  document.getElementById('cam_dvr_id').value = c.dvr_id || "";
+  document.getElementById('test-result').innerHTML = "";
+  document.getElementById('url-preview').style.display = 'none';
+  document.getElementById('pass-warn').style.display = 'none';
+  
+  // Parse URL ngược về các trường form
+  const parsed = parseStreamUrl(c.rtsp_url);
+  if (parsed) {
+      document.getElementById('builder_proto').value = parsed.proto;
+      document.getElementById('builder_ip').value = parsed.host;
+      document.getElementById('builder_port').value = parsed.port;
+      document.getElementById('builder_user').value = parsed.user;
+      document.getElementById('builder_pass').value = parsed.pass;
+      document.getElementById('builder_channel').value = parsed.channel;
+      document.getElementById('builder_subtype').value = parsed.subtype;
+      onProtocolChange();
+      // Giữ nguyên port từ URL gốc (không để onProtocolChange ghi đè)
+      document.getElementById('builder_port').value = parsed.port;
+  } else {
+      // Không parse được → chuyển sang custom
+      document.getElementById('builder_proto').value = 'custom';
+      onProtocolChange();
+      document.getElementById('cam_rtsp').value = c.rtsp_url;
+  }
+  
+  checkPasswordWarning();
+  updateUrlPreview();
+  document.getElementById('camera-modal').classList.add('open');
+}
+
+// Parse URL ngược thành các trường form
+function parseStreamUrl(url) {
+    if (!url) return null;
+    
+    try {
+        // Tìm scheme
+        const schemeMatch = url.match(/^(\w+):\/\//);
+        if (!schemeMatch) return null;
+        const scheme = schemeMatch[1].toLowerCase();
+        
+        // Tách credentials và host
+        const afterScheme = url.substring(schemeMatch[0].length);
+        const atIdx = afterScheme.lastIndexOf('@');
+        if (atIdx === -1) return null;
+        
+        const creds = afterScheme.substring(0, atIdx);
+        const rest = afterScheme.substring(atIdx + 1);
+        
+        // Parse user:pass (URL-decoded)
+        const colonIdx = creds.indexOf(':');
+        const user = colonIdx >= 0 ? decodeURIComponent(creds.substring(0, colonIdx)) : decodeURIComponent(creds);
+        const pass = colonIdx >= 0 ? decodeURIComponent(creds.substring(colonIdx + 1)) : '';
+        
+        // Parse host:port/path?query
+        let host, port, path = '', query = '';
+        const pathStart = rest.indexOf('/');
+        const queryStart = rest.indexOf('?');
+        let hostPort;
+        
+        if (pathStart >= 0) {
+            hostPort = rest.substring(0, pathStart);
+            if (queryStart >= 0) {
+                path = rest.substring(pathStart, queryStart);
+                query = rest.substring(queryStart + 1);
+            } else {
+                path = rest.substring(pathStart);
+            }
+        } else if (queryStart >= 0) {
+            hostPort = rest.substring(0, queryStart);
+            query = rest.substring(queryStart + 1);
+        } else {
+            hostPort = rest;
+        }
+        
+        const lastColon = hostPort.lastIndexOf(':');
+        if (lastColon >= 0) {
+            host = hostPort.substring(0, lastColon);
+            port = parseInt(hostPort.substring(lastColon + 1)) || 554;
+        } else {
+            host = hostPort;
+            port = 554;
+        }
+        
+        // Parse channel và subtype từ query hoặc path
+        let channel = 1, subtype = 0;
+        const params = new URLSearchParams(query);
+        if (params.has('channel')) channel = parseInt(params.get('channel')) || 1;
+        if (params.has('subtype')) subtype = parseInt(params.get('subtype')) || 0;
+        
+        // Hikvision path format: /Streaming/Channels/XYY (X=channel, YY=01 main, 02 sub)
+        const hikMatch = path.match(/\/Streaming\/Channels\/(\d+)/);
+        if (hikMatch) {
+            const chCode = parseInt(hikMatch[1]);
+            channel = Math.floor(chCode / 100) || 1;
+            const sub = chCode % 100;
+            subtype = (sub === 2) ? 1 : 0;
+        }
+        
+        // Xác định proto cho form
+        let proto = 'custom';
+        if (scheme === 'dvrip') {
+            proto = 'dvrip';
+        } else if (scheme === 'http' && path.includes('cgi-bin/mjpg')) {
+            proto = 'dahua_http';
+        } else if (scheme === 'rtsp' && path.includes('cam/realmonitor')) {
+            proto = 'rtsp_dahua';
+        } else if (scheme === 'rtsp' && path.includes('Streaming/Channels')) {
+            proto = 'rtsp_hik';
+        } else if (scheme === 'isapi') {
+            proto = 'isapi';
+        } else if (scheme === 'onvif') {
+            proto = 'onvif';
+        } else if (scheme === 'rtsp') {
+            proto = 'rtsp_dahua'; // Fallback RTSP → Dahua format
+        }
+        
+        return { proto, host, port, user, pass, channel, subtype };
+    } catch (e) {
+        console.error('parseStreamUrl error:', e);
+        return null;
+    }
+}
+
+function generateFinalUrl() {
+  const proto = document.getElementById('builder_proto').value;
+  let finalUrl = "";
+  
+  if (proto === 'custom') {
+      finalUrl = document.getElementById('cam_rtsp').value;
+  } else {
+      let ip = document.getElementById('builder_ip').value.trim();
+      ip = ip.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      const port = document.getElementById('builder_port').value;
+      const user = encodeURIComponent(document.getElementById('builder_user').value);
+      const pass = encodeURIComponent(document.getElementById('builder_pass').value);
+      const channel = document.getElementById('builder_channel').value || '1';
+      const subtype = document.getElementById('builder_subtype').value || '1';
+      
+      if (!ip) return "";
+      
+      switch (proto) {
+          case 'dvrip':
+              // Dahua TCP protocol — go2rtc native support
+              finalUrl = `dvrip://${user}:${pass}@${ip}:${port}?channel=${channel}&subtype=${subtype}`;
+              break;
+          case 'dahua_http':
+              // Dahua HTTP MJPEG — qua cổng web
+              finalUrl = `http://${user}:${pass}@${ip}:${port}/cgi-bin/mjpg/video.cgi?channel=${channel}&subtype=${subtype}`;
+              break;
+          case 'rtsp_dahua':
+              // RTSP chuẩn Dahua path
+              finalUrl = `rtsp://${user}:${pass}@${ip}:${port}/cam/realmonitor?channel=${channel}&subtype=${subtype}`;
+              break;
+          case 'rtsp_hik':
+              // RTSP Hikvision — channel format: {channel}0{subtype+1}
+              const hikChannel = `${channel}0${parseInt(subtype) + 1}`;
+              finalUrl = `rtsp://${user}:${pass}@${ip}:${port}/Streaming/Channels/${hikChannel}`;
+              break;
+          case 'isapi':
+              finalUrl = `isapi://${user}:${pass}@${ip}:${port}`;
+              break;
+          case 'onvif':
+              finalUrl = `onvif://${user}:${pass}@${ip}:${port}`;
+              break;
+      }
+  }
+  return finalUrl;
+}
+
+let currentTestName = null;
+
+async function testConnection() {
+    const finalUrl = generateFinalUrl();
+    if (!finalUrl) {
+        alert("Vui lòng điền đủ Địa chỉ IP hoặc Đường dẫn để kiểm tra!");
+        return;
+    }
+    
+    const resultDiv = document.getElementById('test-result');
+    resultDiv.innerHTML = `
+        <div style="padding: 15px; background: rgba(0,209,255,0.05); border: 1px solid rgba(0,209,255,0.2); border-radius: 8px;">
+            <div style="color: var(--accent); font-weight: bold; margin-bottom: 5px;">⏳ Đang kết nối...</div>
+            <div style="font-size: 12px; color: var(--text-2);">Vui lòng đợi 3-10 giây. go2rtc đang thiết lập kết nối tới camera.</div>
+        </div>
+    `;
+    
+    // Cleanup luồng test cũ nếu có
+    if (currentTestName) {
+        try {
+            await fetch(`http://${window.location.hostname}:1984/api/streams?src=${encodeURIComponent(currentTestName)}`, { method: 'DELETE' }).catch(() => {});
+        } catch(e) {}
+    }
+    
+    currentTestName = 'test_cam_' + new Date().getTime();
+    try {
+        await fetch(`/api/go2rtc/streams?name=${encodeURIComponent(currentTestName)}&src=${encodeURIComponent(finalUrl)}`, { method: 'PUT' });
+    } catch (e) {
+        console.error("Lỗi khi thêm stream test vào go2rtc:", e);
+    }
+    
+    const go2rtcUrl = `http://${window.location.hostname}:1984/stream.html?src=${currentTestName}`;
+    
+    // Ẩn password trong URL preview
+    const maskedUrl = finalUrl.replace(/(\/\/[^:]+:)([^@]+)(@)/, '$1****$3');
+    
+    resultDiv.innerHTML = `
+        <div style="background: rgba(0,209,255,0.03); border: 1px solid rgba(0,209,255,0.15); border-radius: 8px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: rgba(0,209,255,0.08); font-weight: bold; color: var(--accent); font-size: 13px;">
+                ▶ Đang phát luồng thử nghiệm
+            </div>
+            <iframe src="${go2rtcUrl}" style="width: 100%; height: 250px; border: none; display: block;" allow="autoplay; fullscreen"></iframe>
+            <div style="padding: 8px 12px; font-size: 11px; color: var(--text-2); border-top: 1px solid var(--line);">
+                <div style="margin-bottom: 4px;"><strong>URL:</strong> <code style="font-size: 10px; word-break: break-all;">${maskedUrl}</code></div>
+                Nếu video đen, kiểm tra: ① Cổng đã mở trên router ② IP/DDNS đúng ③ Mật khẩu đúng ④ Giao thức phù hợp
+            </div>
+        </div>
+    `;
+}
+
+async function saveCamera(e) {
+  e.preventDefault();
+  
+  const proto = document.getElementById('builder_proto').value;
+  const data = {
+    camera_id: document.getElementById('cam_id').value,
+    name: document.getElementById('cam_name').value,
+    dvr_id: document.getElementById('cam_dvr_id').value || null
+  };
+
+  if (proto !== 'custom') {
+      let ip = document.getElementById('builder_ip').value.trim();
+      ip = ip.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      const port = document.getElementById('builder_port').value;
+      const user = document.getElementById('builder_user').value;
+      const pass = document.getElementById('builder_pass').value;
+      
+      if (!ip) {
+          alert("Vui lòng điền địa chỉ IP hoặc DDNS hợp lệ!");
+          return;
+      }
+      data.is_ip_camera = true;
+      data.ip_address = ip;
+      data.port = parseInt(port) || 0;
+      data.username = user;
+      data.password = pass;
+      
+      if (proto.includes("hik") || proto === "isapi") data.brand = "hikvision";
+      else if (proto.includes("dahua") || proto === "dvrip") data.brand = "dahua";
+      else data.brand = "onvif";
+      
+      data.rtsp_url = generateFinalUrl();
+  } else {
+      const finalUrl = generateFinalUrl();
+      if (!finalUrl) {
+          alert("Vui lòng điền đường dẫn hợp lệ!");
+          return;
+      }
+      data.is_ip_camera = false;
+      data.rtsp_url = finalUrl;
+  }
+  try {
+    const method = editingCamId ? 'PUT' : 'POST';
+    const res = await fetch('/api/cameras', {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if(res.ok) {
+      closeModal('camera-modal');
+      fetchCameras();
+    } else {
+      alert("Lỗi: " + await res.text());
+    }
+  } catch(e) { alert(e); }
+}
+
+async function deleteCamera(id) {
+  if(!confirm("Bạn có chắc muốn xóa camera này?")) return;
+  try {
+    const res = await fetch(`/api/cameras/${id}`, { method: 'DELETE' });
+    if(res.ok) fetchCameras();
+    else alert("Lỗi: " + await res.text());
+  } catch(e) { alert(e); }
+}
+
+// DVR Actions
+function getNextDvrId() {
+    let max = 0;
+    dvrs.forEach(d => {
+        const match = d.dvr_id.match(/dvr_(\d+)/);
+        if (match) {
+            const num = parseInt(match[1]);
+            if (num > max) max = num;
+        }
+    });
+    return `dvr_${max + 1}`;
+}
+
+function openDvrModal() {
+  editingDvrId = null;
+  const nextId = getNextDvrId();
+  document.getElementById('dvr-modal-title').innerText = "Thêm Đầu ghi";
+  document.getElementById('dvr_id').disabled = false; // Reset state
+  document.getElementById('dvr_id').value = nextId;
+  document.getElementById('dvr_name').value = "Đầu ghi " + nextId.split('_')[1];
+  document.getElementById('dvr_host').value = "";
+  document.getElementById('dvr_http_port').value = 80;
+  document.getElementById('dvr_tcp_port').value = 37777;
+  document.getElementById('dvr_rtsp_port').value = 554;
+  document.getElementById('dvr_user').value = "admin";
+  document.getElementById('dvr_pass').value = "";
+  document.getElementById('dvr_brand').value = "dahua";
+  document.getElementById('dvr-test-result').innerHTML = "";
+  document.getElementById('dvr-modal').classList.add('open');
+}
+
+function editDVR(id) {
+  const d = dvrs.find(x => x.dvr_id === id);
+  if(!d) return;
+  editingDvrId = id;
+  document.getElementById('dvr-modal-title').innerText = "Sửa Đầu ghi";
+  document.getElementById('dvr_id').value = d.dvr_id;
+  document.getElementById('dvr_id').disabled = true;
+  document.getElementById('dvr_name').value = d.name;
+  document.getElementById('dvr_host').value = d.host;
+  document.getElementById('dvr_http_port').value = d.http_port;
+  document.getElementById('dvr_tcp_port').value = d.tcp_port || 37777;
+  document.getElementById('dvr_rtsp_port').value = d.rtsp_port || 554;
+  document.getElementById('dvr_user').value = d.username;
+  document.getElementById('dvr_pass').value = ""; // Don't show password
+  document.getElementById('dvr_brand').value = d.brand;
+  document.getElementById('dvr-test-result').innerHTML = "";
+  document.getElementById('dvr-modal').classList.add('open');
+}
+
+function isDahuaTcpPort(port) {
+    const value = Number(port);
+    return value === 3771 || value === 3777 || (value >= 37700 && value <= 37899);
+}
+
+function splitRecorderHostInput(value) {
+    let text = (value || '').trim().replace(/^https?:\/\//i, '');
+    const slashIndex = text.indexOf('/');
+    if (slashIndex >= 0) text = text.slice(0, slashIndex);
+    text = text.replace(/\/+$/, '').trim();
+
+    let host = text;
+    let port = null;
+    const lastColon = text.lastIndexOf(':');
+    if (lastColon > -1 && text.indexOf(':') === lastColon) {
+        const suffix = text.slice(lastColon + 1);
+        if (/^\d+$/.test(suffix)) {
+            host = text.slice(0, lastColon);
+            port = parseInt(suffix, 10);
+        }
+    }
+    return { host, port };
+}
+
+function normalizeDvrHostField() {
+    const parsed = splitRecorderHostInput(document.getElementById('dvr_host').value);
+    document.getElementById('dvr_host').value = parsed.host;
+    if (parsed.port) {
+        if (isDahuaTcpPort(parsed.port)) {
+            document.getElementById('dvr_tcp_port').value = parsed.port;
+        } else if ([554, 555, 8554].includes(parsed.port)) {
+            document.getElementById('dvr_rtsp_port').value = parsed.port;
+        } else {
+            document.getElementById('dvr_http_port').value = parsed.port;
+        }
+    }
+    return parsed.host;
+}
+
+function maskStreamUrl(url) {
+    return (url || '').replace(/(\/\/[^:\/?#]+:)([^@]*)(@)/, '$1****$3');
+}
+
+function summarizeProbeCandidates(items) {
+    if (!Array.isArray(items)) return '';
+    return items.map(item => `<span class="${item.open ? 'probe-open' : 'probe-closed'}">${item.port} ${item.open ? 'mo' : 'dong'}</span>`).join(' | ');
+}
+
+function go2rtcRtspProxyUrl(streamName) {
+    const host = window.location.hostname || '127.0.0.1';
+    return `rtsp://${host}:8554/${streamName}`;
+}
+
+function renderDvrProbeResult(data, title = 'Ket qua tu nhan dien') {
+    if (!data) return '';
+    const status = data.ok ? 'Da tim thay duong ket noi phu hop' : 'Chua tim thay cong video dang mo';
+    const http = summarizeProbeCandidates(data.http_candidates);
+    const video = summarizeProbeCandidates(data.video_candidates);
+    const isDvrip = data.protocol === 'dvrip' || String(data.stream_url || '').startsWith('dvrip://');
+    const dvripNote = isDvrip ? '<div style="margin-top:6px;color:#ffb74d;">VLC khong mo truc tiep dvrip://. Bam Kiem tra ket noi de lay link VLC RTSP proxy.</div>' : '';
+    return `
+        <div class="probe-result">
+            <div style="font-weight:700;color:${data.ok ? '#4ade80' : '#ffb74d'};margin-bottom:6px;">${title}: ${status}</div>
+            <div>Host: <strong>${data.host || '-'}</strong> | HTTP: <strong>${data.http_port || '-'}</strong> | Video: <strong>${data.rtsp_port || '-'}</strong> | Protocol: <strong>${data.protocol || '-'}</strong></div>
+            <div style="margin-top:6px;color:var(--text-2);">HTTP: ${http || '-'}</div>
+            <div style="margin-top:4px;color:var(--text-2);">Video: ${video || '-'}</div>
+            ${data.stream_url ? `<div style="margin-top:6px;">URL he thong go2rtc: <code>${maskStreamUrl(data.stream_url)}</code></div>` : ''}
+            ${dvripNote}
+        </div>
+    `;
+}
+
+function applyProbeToDvrForm(data) {
+    if (!data || !data.ok) return;
+    if (data.host) document.getElementById('dvr_host').value = data.host;
+    if (data.http_port) document.getElementById('dvr_http_port').value = data.http_port;
+    if (data.rtsp_port) document.getElementById('dvr_rtsp_port').value = data.rtsp_port;
+    if (data.tcp_port) document.getElementById('dvr_tcp_port').value = data.tcp_port;
+    if (data.brand && ['dahua', 'generic'].includes(data.brand)) {
+        document.getElementById('dvr_brand').value = data.brand;
+    }
+}
+
+function buildManualDvrPreviewUrl(host, port, user, pass, brand) {
+    const encUser = encodeURIComponent(user);
+    const encPass = encodeURIComponent(pass);
+    let videoPort = Number(port) || 554;
+    // Tự động sửa lỗi nếu user nhập nhầm cổng SDK vào cổng RTSP
+    if (videoPort >= 37700 && videoPort <= 37899) videoPort = 554;
+    if (videoPort === 8000 || videoPort === 34567) videoPort = 554;
+
+    // Always prioritize RTSP stream URL over dvrip
+    if (brand === 'dahua') {
+        return `rtsp://${encUser}:${encPass}@${host}:${videoPort}/cam/realmonitor?channel=1&subtype=1`;
+    }
+    const proto = videoPort === 80 ? 'isapi' : 'rtsp';
+    return `${proto}://${encUser}:${encPass}@${host}:${videoPort}/Streaming/Channels/102`;
+}
+
+async function probeDVRConnection(showStatus = true) {
+    const host = normalizeDvrHostField();
+    const resultDiv = document.getElementById('dvr-test-result');
+    if (!host) {
+        alert('Vui long nhap Host/IP dau ghi!');
+        return null;
+    }
+    const payload = {
+        host,
+        http_port: parseInt(document.getElementById('dvr_http_port').value, 10) || 80,
+        rtsp_port: parseInt(document.getElementById('dvr_rtsp_port').value, 10) || 554,
+        username: document.getElementById('dvr_user').value || 'admin',
+        password: document.getElementById('dvr_pass').value || '',
+        brand: document.getElementById('dvr_brand').value || 'dahua'
+    };
+
+    if (showStatus) {
+        resultDiv.innerHTML = '<div class="probe-result">Dang do HTTP/Video ports truc tiep tu dau ghi...</div>';
+    }
+
+    try {
+        const res = await fetch('/api/dvrs/probe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const raw = await res.text();
+        let data = null;
+        try { data = raw ? JSON.parse(raw) : null; } catch (_) {}
+        if (!res.ok) throw new Error((data && data.error) || raw || res.statusText);
+        if (showStatus) {
+            applyProbeToDvrForm(data);
+            resultDiv.innerHTML = renderDvrProbeResult(data);
+        }
+        return data;
+    } catch (e) {
+        if (showStatus) {
+            resultDiv.innerHTML = `<div class="probe-result" style="border-color:rgba(255,93,95,0.35);color:#ffb4b4;">Khong goi duoc API tu nhan dien: ${e.message}</div>`;
+        }
+        return null;
+    }
+}
+
+async function autoDetectDVRConnection() {
+    const data = await probeDVRConnection(true);
+    if (data && data.ok) applyProbeToDvrForm(data);
+}
+
+async function testDVRConnection() {
+    const host = normalizeDvrHostField();
+    const port = parseInt(document.getElementById('dvr_rtsp_port').value, 10) || 554;
+    const user = document.getElementById('dvr_user').value;
+    const pass = document.getElementById('dvr_pass').value;
+    const brand = document.getElementById('dvr_brand').value;
+    
+    if (!host || !user || !pass) {
+        alert("Vui long dien du IP/Host, Tai khoan va Mat khau!");
+        return;
+    }
+    
+    const resultDiv = document.getElementById('dvr-test-result');
+    resultDiv.innerHTML = '<div class="probe-result">Dang tu nhan dien cong tot nhat va ket noi kenh 1...</div>';
+    
+    const probe = await probeDVRConnection(false);
+    let testUrl = '';
+    let probeHtml = '';
+    if (probe && probe.ok && probe.stream_url) {
+        applyProbeToDvrForm(probe);
+        testUrl = probe.stream_url;
+        probeHtml = renderDvrProbeResult(probe, 'Da chon ket noi tot nhat');
+    } else {
+        testUrl = buildManualDvrPreviewUrl(host, port, user, pass, brand);
+        probeHtml = probe ? renderDvrProbeResult(probe, 'Tu nhan dien chua co ket qua') : '<div class="probe-result">Khong goi duoc tu nhan dien, dang thu theo thong tin ban nhap.</div>';
+    }
+    
+    const testName = 'test_dvr_' + new Date().getTime();
+    try {
+        await fetch(`/api/go2rtc/streams?name=${encodeURIComponent(testName)}&src=${encodeURIComponent(testUrl)}`, { method: 'PUT' });
+    } catch (e) {
+        console.error("Loi khi them stream test vao go2rtc:", e);
+    }
+
+    const go2rtcUrl = `http://${window.location.hostname}:1984/stream.html?src=${testName}`;
+    const vlcProxyUrl = go2rtcRtspProxyUrl(testName);
+    const maskedUrl = maskStreamUrl(testUrl);
+    
+    resultDiv.innerHTML = `
+        ${probeHtml}
+        <div style="background: rgba(0,209,255,0.03); border: 1px solid rgba(0,209,255,0.15); border-radius: 8px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: rgba(0,209,255,0.08); font-weight: bold; color: var(--accent); font-size: 13px;">Dang phat kenh 1 thu nghiem</div>
+            <iframe src="${go2rtcUrl}" style="width: 100%; height: 250px; border: none; display: block;" allow="autoplay; fullscreen"></iframe>
+            <div style="padding: 8px 12px; font-size: 11px; color: var(--text-2); border-top: 1px solid var(--line);">
+                <div style="margin-bottom: 4px;"><strong>URL he thong:</strong> <code style="font-size: 10px; word-break: break-all;">${maskedUrl}</code></div>
+                <div style="margin-bottom: 4px;"><strong>VLC RTSP proxy:</strong> <code style="font-size: 10px; word-break: break-all;">${vlcProxyUrl}</code></div>
+                Khong dung URL dvrip truc tiep trong VLC. Neu video den man hinh, hay kiem tra lai tai khoan/mat khau dau ghi va quyen xem kenh 1.
+            </div>
+        </div>
+    `;
+}
+
+async function saveDVR(e) {
+  e.preventDefault();
+  
+  const parsedHost = splitRecorderHostInput(document.getElementById('dvr_host').value);
+  let host = parsedHost.host;
+  
+  const data = {
+    dvr_id: document.getElementById('dvr_id').value,
+    name: document.getElementById('dvr_name').value,
+    host: host,
+    http_port: parseInt(document.getElementById('dvr_http_port').value) || 80,
+    tcp_port: parseInt(document.getElementById('dvr_tcp_port').value) || 37777,
+    rtsp_port: parseInt(document.getElementById('dvr_rtsp_port').value) || 554,
+    username: document.getElementById('dvr_user').value,
+    password: document.getElementById('dvr_pass').value,
+    brand: document.getElementById('dvr_brand').value
+  };
+  
+  if (editingDvrId && !data.password) {
+      // If editing and no new password provided, we might need special handling backend,
+      // but for now let's say backend updates password if provided, otherwise keeps old.
+      // Wait, our backend SQL currently updates password=$7 ALWAYS.
+      // If blank, it will set to blank. User MUST enter password if they edit!
+      const isBlank = confirm("Bạn để trống mật khẩu. Mật khẩu đầu ghi sẽ bị xóa. Bạn có chắc không?");
+      if(!isBlank) return;
+  }
+
+  try {
+    const method = editingDvrId ? 'PUT' : 'POST';
+    const res = await fetch('/api/dvrs', {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if(res.ok) {
+      closeModal('dvr-modal');
+      fetchDVRs();
+    } else {
+      alert("Lỗi: " + await res.text());
+    }
+  } catch(e) { alert(e); }
+}
+
+async function deleteDVR(id) {
+  if(!confirm("Bạn có chắc muốn xóa đầu ghi này? (Các camera thuộc đầu ghi vẫn sẽ được giữ lại)")) return;
+  try {
+    const res = await fetch(`/api/dvrs/${id}`, { method: 'DELETE' });
+    if(res.ok) fetchDVRs();
+    else alert("Lỗi: " + await res.text());
+  } catch(e) { alert(e); }
+}
+
+async function syncDVR(id) {
+  if(!confirm("Đồng bộ sẽ tìm và tự động thêm các camera từ đầu ghi này. Bạn có muốn tiếp tục?")) return;
+  try {
+    const res = await fetch(`/api/dvrs/sync`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dvr_id: id })
+    });
+    if(res.ok) {
+        alert("Đã gửi yêu cầu đồng bộ. Vui lòng tải lại trang sau ít phút để xem các camera mới.");
+        fetchCameras();
+    }
+    else alert("Lỗi: " + await res.text());
+  } catch(e) { alert(e); }
+}
+
+// Scan LAN Actions
+function openScanModal() {
+  document.getElementById('scan-status').innerText = 'Nhấn "Bắt đầu quét" để dò tìm IP Camera hỗ trợ ONVIF trong mạng.';
+  document.getElementById('scan-results').innerHTML = '';
+  document.getElementById('scan-modal').classList.add('open');
+}
+
+async function startScan() {
+  const btn = document.getElementById('btn-start-scan');
+  const status = document.getElementById('scan-status');
+  const results = document.getElementById('scan-results');
+  
+  btn.disabled = true;
+  btn.innerText = "Đang quét (khoảng 3s)...";
+  status.innerText = "Đang phát gói tin WS-Discovery...";
+  results.innerHTML = "";
+  
+  try {
+      const res = await fetch('/api/scan_lan');
+      const data = await res.json();
+      
+      if(data.error) {
+          status.innerText = "Lỗi: " + data.error;
+      } else if(data.length === 0) {
+          status.innerText = "Không tìm thấy thiết bị ONVIF nào trong mạng.";
+      } else {
+          status.innerText = `Tìm thấy ${data.length} thiết bị:`;
+          let html = '<ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px;">';
+          data.forEach(ip => {
+              html += `<li style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:6px;">
+                 <span><strong>${ip}</strong></span>
+                 <button class="btn btn-outline" style="padding:4px 10px; font-size:12px;" onclick="addScannedCamera('${ip}')">Thêm nhanh</button>
+              </li>`;
+          });
+          html += '</ul>';
+          results.innerHTML = html;
+      }
+  } catch(e) {
+      status.innerText = "Lỗi khi quét: " + e.message;
+  }
+  
+  btn.disabled = false;
+  btn.innerText = "Quét lại";
+}
+
+function addScannedCamera(ip) {
+    closeModal('scan-modal');
+    openCameraModal();
+    // cam_id and cam_name are already auto-generated by openCameraModal
+    
+    document.getElementById('builder_ip').value = ip;
+    document.getElementById('builder_proto').value = 'dvrip';
+    onProtocolChange();
+}
+
+// Init
+fetchDVRs();
+fetchCameras();
+
+</script>
+</body>
+</html>

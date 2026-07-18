@@ -1,0 +1,42 @@
+# Build artifacts
+build/
+*.exe
+*.dll
+*.so
+*.o
+*.obj
+*.pdb
+*.lib
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.suo
+*.sln
+
+# AI Agent logs/configs
+.agents/
+.claude/
+.gemini/
+
+# App Data
+logs/
+snapshots/
+recordings/
+database/*.db
+
+# Models
+models/
+*.pt
+*.onnx
+
+# Temp files
+fix_frontend.py
+*.pdf

@@ -1,0 +1,392 @@
+{
+  "dvr_1_CAM_27": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_32": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_23": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_26": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_30": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_31": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_24": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_33": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_35": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_28": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_18": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_34": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_25": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_29": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_03": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_22": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_21": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_41": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_37": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_38": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_20": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_01": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_36": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_02": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_06": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_08": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_07": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_39": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_04": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_19": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_05": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_15": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_49": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_47": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_10": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_11": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_17": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_50": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_40": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_52": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_13": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_46": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_53": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_44": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_14": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_09": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_48": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_12": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_51": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "cam_1": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_43": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_45": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_16": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_42": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_57": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_54": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_61": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_56": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_55": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_64": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_60": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_58": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_59": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_62": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  },
+  "dvr_1_CAM_63": {
+    "status": "online",
+    "source": "direct_tcp_reachability",
+    "dvr_id": "",
+    "updated_at": 1784349327
+  }
+}

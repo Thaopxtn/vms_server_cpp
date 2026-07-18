@@ -1,0 +1,251 @@
+/* Premium Commercial VMS Theme (HikCentral / Milestone Inspired) */
+
+:root {
+  /* Core Colors */
+  --bg: #0d0f12;           /* Deep dark background */
+  --panel: #14171c;        /* Panels and toolbars */
+  --panel-2: #1c2026;      /* Elevated panels */
+  --panel-3: #252a32;      /* Hover states */
+  
+  --line: rgba(255, 255, 255, 0.08);
+  --line-soft: rgba(255, 255, 255, 0.04);
+  
+  --text: #e2e8f0;         /* Primary text */
+  --text-2: #94a3b8;       /* Secondary text */
+  --text-3: #64748b;       /* Muted text */
+  
+  /* Accents - Material 3 Blue/Cyan */
+  --accent: #0ea5e9;
+  --primary: #0284c7;
+  --accent-2: #38bdf8;
+  
+  /* Semantic Colors */
+  --danger: #ef4444;       /* AI Alerts, Offline */
+  --warning: #f59e0b;      /* Motion, Warnings */
+  --ok: #10b981;           /* Online, Success */
+  
+  /* Typography & Layout */
+  --radius: 6px;           /* Sharper corners for pro feel */
+  --topbar-h: 56px;
+  --sidebar-w: 220px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  --font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+
+/* Global Overrides */
+body {
+  background-color: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Bar / Topbar */
+#topbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 10px rgba(0,0,0,0.5);
+}
+
+.brand-mark {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(14, 165, 233, 0.3);
+}
+
+/* Sidebar */
+#sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+
+.nav-btn {
+  border-radius: var(--radius);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.nav-btn:hover {
+  background: var(--panel-2);
+  transform: translateX(4px);
+}
+
+.nav-btn.active {
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--accent-2);
+}
+
+.nav-btn.active::before {
+  background: var(--accent);
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  left: -10px; /* Attach to edge of sidebar */
+}
+
+/* Monitor Toolbar */
+#monitor-toolbar {
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.btn, .grid-btn, .page-btn {
+  border-radius: var(--radius);
+  background: var(--panel-3);
+  border: 1px solid var(--line);
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.btn:hover, .grid-btn:hover, .page-btn:hover:not(:disabled) {
+  background: #2e3440;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.btn-primary, .grid-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+.filter-input, #cam-search {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.filter-input:focus, #cam-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+}
+
+/* Camera Grid (Smart Grid Override) */
+#cam-grid-wrap, #ai-cam-grid-wrap {
+  background: var(--bg);
+  padding: 4px; /* Tighter padding */
+}
+
+/* Camera Slot / Card Overlay Rebuild */
+.cam-slot {
+  background: #000;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cam-slot:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cam-slot.offline {
+  border-color: var(--danger);
+  opacity: 0.8;
+}
+
+/* Gradient Top Overlay */
+.cam-overlay-info {
+  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  padding: 8px 12px 24px;
+}
+
+.cam-name-tag {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.cam-ts {
+  font-size: 12px;
+  color: #cbd5e1;
+  font-family: var(--mono);
+}
+
+/* Bottom Control Bar */
+.cam-ctrl-bar {
+  background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
+  border-top: none;
+  padding: 10px 12px;
+}
+
+.cam-ctrl-label {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: #94a3b8;
+}
+
+/* Alerting / AI Glow */
+.cam-slot.alerting {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px var(--danger), 0 0 15px rgba(239, 68, 68, 0.3);
+}
+
+/* AI Event Panel Refactor (Hikvision Style) */
+.events-wrap {
+  background: var(--panel);
+}
+
+.ev-card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.ev-card:hover {
+  border-color: var(--accent);
+  background: var(--panel-3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.ev-card-thumb {
+  border-radius: 4px;
+  border: none;
+  background: #000;
+}
+
+.ev-plate-info-row {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.ev-plate-crop-wrap {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #000;
+}
+
+.ev-vehicle-label {
+  color: var(--accent-2);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ev-plate-text-bold {
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* Smooth scrollbar globally */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
